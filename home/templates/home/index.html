@@ -1,0 +1,66 @@
+{% extends "home/base.html" %}
+{% load static %}
+{% block body %}
+<div class="headerContainer">
+    <p class="pl-5 py-3">Core Builder</p>
+</div>
+
+<audio id="toneUp">
+    <source src="{% static "sounds/tone_up.mp3" %}" type="audio/mp3">
+</audio>
+<audio id="toneDown">
+    <source src="{% static "sounds/tone_down.mp3" %}" type="audio/mp3">
+</audio>
+
+<p id="test"></p>
+
+<div class="contentContainer">
+    <div class="timerPane pane text-center">
+        <div class="timerTop">
+            <button id="settingsButton" type="button" class="close" style="margin-top:-10px;display: none;">
+                <i class="fa fa-cog" onclick="openSettings()" style="font-size:20px;"></i>
+            </button>
+            <p id = "onOff">IDK</p>
+            <h1 id="timer" class="mx-auto">0.00</h1>
+            
+            <div class="buttonContainer mt-3">
+                <button id="startStop" class="btn btn-success" onclick="this.blur();toggleStartStop()">Start</button>
+                <button class="btn btn-primary" onClick="this.blur();reset()">Reset</button>
+            </div>
+        </div>
+        <div class="progressBar">
+            <table id="progressTable">
+                <tr id="progressBar">
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div id="settingsPane" class="settingsPane pane">
+        <div class="settingsContent">
+            <button type="button" class="close" style="margin-top: -10px;">
+                <i class="fa fa-close" onclick="closeSettings()" style="font-size:20px;"></i>
+            </button>
+            <form>
+                <div class="form-group">
+                <label for="on">Working</label>
+                <input type="number" class="form-control" id="on" value="55">
+                </div>
+                <div class="form-group">
+                    <label for="rest">Rest</label>
+                    <input type="number" class="form-control" id="rest" value="5">
+                </div>
+                <div class="form-group">
+                    <label for="reps">Reps</label>
+                    <input type="number" class="form-control" id="reps" value="8">
+                </div>
+                <button type="button" onclick="updateSettings()" class="btn btn-primary">Apply</button>
+            </form>
+        </div>
+    </div>
+    <p id="test"></p>
+
+</div>
+
+<script src="{% static "javascript/script.js" %}"></script>
+{% endblock %}
