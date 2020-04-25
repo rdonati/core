@@ -6,5 +6,4 @@ def home(request):
     context = {
         'exercises': serializers.serialize("json", Exercise.objects.all())
     }
-    print(context['exercises'])
     return render(request, 'home/index.html', context)

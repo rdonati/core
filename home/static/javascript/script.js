@@ -30,6 +30,82 @@ class Workout{
     }
 }
 
+class Stopwatch{
+    // Expecting jQuery reference to html elements
+    constructor(display, startStopButton, resetButton, on=55, off=5){
+
+        this.startStopButton = startStopButton;
+        this.resetButton = resetButton;
+        this.display = display;
+
+        this.seconds = 0;
+        this.displayTime = 0;
+        this.active = false;
+        this.timer;
+    }
+
+    get total(){
+        return on + off;
+    }
+
+    get time(){
+        return Array([Math.floor(this.seconds/60), this.seconds%60]);
+    }
+
+    render(){
+        
+    }
+
+    tick(){
+        this.seconds += 0.01;
+    }
+
+    toggleStartStop(){
+        this.active ? stopTimer() : start();
+        this.active = !this.active;
+    }
+
+    start(){
+        stopTimer();
+        this.timer = setInterval(tick, 10);
+    }
+    
+    stop(){
+        this.active = false;
+        clearInterval(this.timer);
+    }
+    
+    reset(){
+        stopTimer();
+        this.active = false;
+        this.seconds = 0;
+    }
+
+    // formatTimeCountUp(){
+    //     mins = Math.floor(time/60);
+    //     seconds = time%60;
+    //     seconds = Math.round(seconds * 100) / 100;
+    //     if(seconds%1==0) seconds = seconds + ".00";
+    //     else if((seconds*10) % 1==0) seconds = seconds + "0";
+    //     if(seconds < 10 && mins > 0) seconds = "0"+seconds;
+    //     if(mins > 0) return(mins + ":" + seconds);
+    //     else return(seconds);
+    // }
+    
+    formatTimeCountDown(){
+        let intervalTime = this.seconds % this.total;
+        this.displayTime = (intervalTime < this.on) ? (this.on - intervalTime) : (this.rest - (intervalTime - this.on));
+        mins = Math.floor(t/60);
+        seconds = t%60;
+        seconds = Math.round(seconds * 100) / 100
+        if(seconds%1==0) seconds = seconds + ".00";
+        else if((seconds*10) % 1==0) seconds = seconds + "0";
+        if(seconds < 10 && mins > 0) seconds = "0"+seconds;
+        if(mins > 0) return(mins + ":" + seconds)
+        else return(seconds)
+    }
+}
+
 let time = 0;
 let displayTime = 0;
 let active = false;
@@ -90,7 +166,6 @@ function updateSettings(){
     total = on + rest;
     initialize();
 }
-This is a test
 
 function initialize(){
     display.text(formatTimeCountDown(time));
