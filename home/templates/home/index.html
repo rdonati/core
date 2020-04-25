@@ -21,6 +21,7 @@
                 <i class="fa fa-cog" onclick="openSettings()" style="font-size:20px;"></i>
             </button>
             <p id = "onOff">IDK</p>
+            <p id="exercise"></p>
             <h1 id="timer" class="mx-auto">0.00</h1>
             
             <div class="buttonContainer mt-3">
@@ -58,9 +59,8 @@
             </form>
         </div>
     </div>
-    <p id="test"></p>
 
 </div>
-
+<script id="exercises" type="application/json">{{exercises}}</script>
 <script src="{% static "javascript/script.js" %}"></script>
 {% endblock %}
