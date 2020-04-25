@@ -90,6 +90,7 @@ function updateSettings(){
     total = on + rest;
     initialize();
 }
+This is a test
 
 function initialize(){
     display.text(formatTimeCountDown(time));
