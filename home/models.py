@@ -13,8 +13,8 @@ class Exercise(models.Model):
         HARD = 3
         EXTREME = 4
 
-    name = models.CharField(max_length=15)
-    description = models.TextField(null=True)
+    name = models.CharField(max_length=25)
+    description = models.TextField(null=True,blank=True)
     target_area = models.IntegerField(choices=TargetArea.choices)
     difficulty = models.IntegerField(choices=Difficulty.choices)
 

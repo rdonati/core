@@ -31,96 +31,182 @@ class Workout{
 }
 
 class Stopwatch{
-    // Expecting jQuery reference to html elements
-    constructor(display, startStopButton, resetButton, on=55, off=5){
+    constructor(on, rest, reps){
+        // Binding all functions so that they can be used as button click events
+        this.start = this.start.bind(this);
+        this.stop = this.stop.bind(this);
+        this.reset = this.reset.bind(this);
+        this.toggleStartStop = this.toggleStartStop.bind(this);
+        this.tick = this.tick.bind(this);
+        this.render = this.render.bind(this);
+        
+        // References to HTML elements
+        this.startStopButton = $("#stopwatch-startStop");
+        this.resetButton = $("#stopwatch-reset");
+        this.display = $("#stopwatch-display");
 
-        this.startStopButton = startStopButton;
-        this.resetButton = resetButton;
-        this.display = display;
-
-        this.seconds = 0;
-        this.displayTime = 0;
+        this.time = -5;
         this.active = false;
         this.timer;
+        this.on = on;
+        this.rest = rest;
+        this.reps = reps;
+
+        this.initializeButtons();
+        this.initializeProgressBar();
+        this.render();
     }
 
     get total(){
-        return on + off;
+        return this.on + this.rest;
     }
 
-    get time(){
-        return Array([Math.floor(this.seconds/60), this.seconds%60]);
+    // Sets text and click event for buttons
+    initializeButtons(){
+        this.startStopButton.text("Start");
+        this.startStopButton.click(this.toggleStartStop);
+
+        this.resetButton.text("Reset");
+        this.resetButton.click(this.reset);
     }
 
+    // Sets display... add any other necessary methods
     render(){
-        
+        this.display.text(this.formatCountdown());
     }
 
+    // Increments time
     tick(){
-        this.seconds += 0.01;
+        this.time += 0.01;
+        if(this.time >= (this.total)*this.reps){
+            this.reset();
+            this.display.text("DONE");
+        }
+        else{
+            this.updateProgressBar();
+            this.render();
+        }
     }
 
-    toggleStartStop(){
-        this.active ? stopTimer() : start();
-        this.active = !this.active;
+    // Default formatting method. Displays as (1.33, 10.33, 1:03.33)
+    format(){
+        let secs = Math.round((this.time % 60)*100) / 100;
+        let mins = Math.floor(this.time/60);
+
+        // Adding trailing zeros (e.g. 1.3 => 1.30, 1 => 1.00)
+        if(secs % 1 == 0) secs += ".00";
+        else if((secs*10) % 1 == 0) secs += "0";
+
+        // Adds preceding 0 (e.g. 1:3.00 => 1:03.00)
+        if(secs < 10 && mins > 0) secs = "0" + secs;
+
+        // Only returns minutes when minutes exist (e.g. 10.33 NOT 0:10.33)
+        if(mins){
+            return(mins + ":" + secs)
+        }else{
+            return String(secs);
+        }
+    }
+
+    formatCountdown(){
+        if(this.time < 0){
+            let secs = Math.round(this.time * -100) /100;
+            if(secs % 1 == 0) secs += ".00";
+            else if((secs*10) % 1 == 0) secs += "0";
+            return secs;
+        }
+        let timeInInterval = this.time % this.total;
+        let t;
+        if(timeInInterval < this.on) t = this.on - timeInInterval;
+        else t = this.rest - (timeInInterval - this.on);
+
+        let secs = Math.round((t % 60)*100) / 100;
+        let mins = Math.floor(t/60);
+
+        // Adding trailing zeros (e.g. 1.3 => 1.30, 1 => 1.00)
+        if(secs % 1 == 0) secs += ".00";
+        else if((secs*10) % 1 == 0) secs += "0";
+
+        // Adds preceding 0 (e.g. 1:3.00 => 1:03.00)
+        if(secs < 10 && mins > 0) secs = "0" + secs;
+
+        // Only returns minutes when minutes exist (e.g. 10.33 NOT 0:10.33)
+        if(mins){
+            return(mins + ":" + secs)
+        }else{
+            return String(secs);
+        }
     }
 
     start(){
-        stopTimer();
-        this.timer = setInterval(tick, 10);
+        this.timer = setInterval(this.tick, 10);
+        this.active = true;
+        this.startStopButton.text("Stop");
+        this.startStopButton.addClass("btn-danger");
     }
     
     stop(){
-        this.active = false;
         clearInterval(this.timer);
-    }
-    
-    reset(){
-        stopTimer();
         this.active = false;
-        this.seconds = 0;
+        this.startStopButton.text("Start");
+        this.startStopButton.removeClass("btn-danger");
     }
 
-    // formatTimeCountUp(){
-    //     mins = Math.floor(time/60);
-    //     seconds = time%60;
-    //     seconds = Math.round(seconds * 100) / 100;
-    //     if(seconds%1==0) seconds = seconds + ".00";
-    //     else if((seconds*10) % 1==0) seconds = seconds + "0";
-    //     if(seconds < 10 && mins > 0) seconds = "0"+seconds;
-    //     if(mins > 0) return(mins + ":" + seconds);
-    //     else return(seconds);
-    // }
-    
-    formatTimeCountDown(){
-        let intervalTime = this.seconds % this.total;
-        this.displayTime = (intervalTime < this.on) ? (this.on - intervalTime) : (this.rest - (intervalTime - this.on));
-        mins = Math.floor(t/60);
-        seconds = t%60;
-        seconds = Math.round(seconds * 100) / 100
-        if(seconds%1==0) seconds = seconds + ".00";
-        else if((seconds*10) % 1==0) seconds = seconds + "0";
-        if(seconds < 10 && mins > 0) seconds = "0"+seconds;
-        if(mins > 0) return(mins + ":" + seconds)
-        else return(seconds)
+    toggleStartStop(){
+        if(this.active){
+            this.stop();
+        }else{
+            this.start();
+        }
+    }
+
+    reset(){
+        this.stop();
+        this.time = -5;
+        this.render();
+    }
+
+    initializeProgressBar(){
+        $("#progressBar").empty();
+        for(let i = 0; i < this.reps; i++){
+            $("#progressBar").append("<td>"+(i+1)+"</td>");
+        }
+    }
+
+    updateProgressBar(){
+        let currentInterval = Math.ceil(this.time/this.total) - 1;
+        let children = $("#progressBar").children();
+        console.log(currentInterval);
+        for(let i = 0; i < this.reps; i++){
+            // Green
+            if(i < currentInterval) $(children[i]).css("background-color", "#99e398");
+            // Red
+            else if(i > currentInterval) $(children[i]).css("background-color", "#ff7575");
+            // Orange
+            else if(i == currentInterval) $(children[i]).css("background-color", "#ffd599");
+        }
+    }
+
+    setSettings(on, rest, reps){
+        this.on = on;
+        this.rest = rest;
+        this.reps = reps;
+
+        this.initializeProgressBar();
+        this.reset();
     }
 }
 
-let time = 0;
-let displayTime = 0;
-let active = false;
 let settingsOpen = true;
-let isOn;
+
 let on = 55;
 let rest = 5;
 let reps = 8;
-let total = on + rest;
+
+let stopwatch = new Stopwatch(on, rest, reps);
+
 let progressBar = $("#progressBar");
-let display = $("#timer");
-let startStop = $("#startStop");
-let onOff = $("#onOff");
 let settingsPane = $("#settingsPane");
-let timer;
 
 let toneUp = $("#toneUp");
 let toneDown = $("#toneDown");
@@ -130,8 +216,8 @@ let workout = new Workout($("#exercises").text());
 
 document.addEventListener('keypress', logKey);
 function logKey(e){
-    if(e.code == "Space") toggleStartStop();
-    if(e.code == "KeyR") reset();
+    if(e.code == "Space") stopwatch.toggleStartStop();
+    if(e.code == "KeyR") stopwatch.reset();
     if(e.code == "KeyS") toggleSettings();
 }
 
@@ -160,120 +246,15 @@ function openSettings(){
 }
 
 function updateSettings(){
-    on = Number(document.getElementById("on").value);
-    rest = Number(document.getElementById("rest").value);
-    reps = Number(document.getElementById("reps").value);
-    total = on + rest;
-    initialize();
+    let on = Number(document.getElementById("on").value);
+    let rest = Number(document.getElementById("rest").value);
+    let reps = Number(document.getElementById("reps").value);   
+    stopwatch.setSettings(on, rest, reps);
 }
 
 function initialize(){
-    display.text(formatTimeCountDown(time));
     workout.generateRandom();
     $("#exercise").text(workout.names());
-    setDisplaySize();
-    initializeProgressBar();
-}
-
-function tick(){
-    time += 0.01;
-    display.text(formatTimeCountDown(time));
-    onOff.text("Time: " + Math.floor(time) + " On: " + on + " Off: " + rest + " Total: " + total);
-    if(Math.floor(on - (time % total)) == 2) toneDown.trigger("play");
-    if(Math.floor(total - (time % total)) == 2) toneUp.trigger("play");
-    setDisplaySize();
-    updateProgressBar();
-}
-
-
-function setDisplaySize(){
-    let size = "200px"
-    if(displayTime > 600) size = "380px";
-    else if(displayTime > 60) size = "330px";
-    else if(displayTime > 10) size = "250px";
-    display.css("width", size);
-}
-
-function toggleStartStop(){
-    active ? stopTimer() : start();
-    active = !active;
-    setStartStopStyle();
-}
-
-function setStartStopStyle(){
-    active ? startStop.text("Stop") : startStop.text("Start");
-    // Default class is btn-success – toggles by adding btn-danger
-    startStop.toggleClass("btn-danger");
-}
-
-function start(){
-    stopTimer();
-    timer = setInterval(tick, 10);
-}
-
-function stopTimer(){
-    clearInterval(timer);
-}
-
-function reset(){
-    stopTimer();
-    active = false;
-    setStartStopStyle();
-    time = 0;
-    displayTime = 0;
-    display.text(formatTimeCountDown(time));
-    updateProgressBar();
-    setDisplaySize();
-}
-
-function setOnOff(){
-    isOn = ((time % total) - on) < 0;
-    onOff.text(isOn ? "ON" : "OFF");
-}
-
-function formatTimeCountUp(time){
-    mins = Math.floor(time/60);
-    seconds = time%60;
-    seconds = Math.round(seconds * 100) / 100;
-    if(seconds%1==0) seconds = seconds + ".00";
-    else if((seconds*10) % 1==0) seconds = seconds + "0";
-    if(seconds < 10 && mins > 0) seconds = "0"+seconds;
-    if(mins > 0) return(mins + ":" + seconds);
-    else return(seconds);
-}
-
-function formatTimeCountDown(time){
-    t = time % total;
-    if(t < on) t = on - t;
-    else t = rest - (t - on);
-    displayTime = t;
-    mins = Math.floor(t/60)
-    seconds = t%60;
-    seconds = Math.round(seconds * 100) / 100
-    if(seconds%1==0) seconds = seconds + ".00";
-    else if((seconds*10) % 1==0) seconds = seconds + "0";
-    if(seconds < 10 && mins > 0) seconds = "0"+seconds;
-    if(mins > 0) return(mins + ":" + seconds)
-    else return(seconds)
-}
-
-function initializeProgressBar(){
-    progressBar.empty();
-    for(let i = 0; i < reps; i++){
-        progressBar.append("<td>"+(i+1)+"</td>");
-    }
-}
-
-function updateProgressBar(){
-    currentInterval = Math.ceil(time/total) - 1;
-    for(let i = 0; i < reps-1; i++){
-        // Green
-        if(i < currentInterval) progressBar.children()[i].css("background-color", "#99e398");
-        // Red
-        else if(i < currentInterval) progressBar.children()[i].css("background-color", "#ff7575");
-        // Orange
-        else if(i < currentInterval) progressBar.children()[i].css("background-color", "#ffd599");
-    }
 }
 
 

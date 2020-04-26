@@ -72,12 +72,10 @@ button:focus{
     font-size: 40px;
 }
 
-#timer{
-    text-align: start;
+#stopwatch-display{
     font-size: 100px;
 }
 
 #progressTable{
     width: 100%;
-    margin-top: 252px;
 }
