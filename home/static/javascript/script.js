@@ -87,6 +87,10 @@ class Stopwatch{
         this.display.text(this.formatCountdown());
         $("#status").text(this.status);
 
+        if(Math.floor(this.time % this.total) == -3) $("#toneUp").trigger("play");
+        if(Math.floor(this.time % this.total) == (this.total - 3)) $("#toneUp").trigger("play");
+        else if(Math.floor(this.time % this.total) == (this.on - 3)) $("#toneDown").trigger("play");
+
         // Setting exercise labels
         this.currentExercise.text("");
         this.nextExercise.text("");
@@ -237,8 +241,6 @@ let stopwatch;
 let progressBar = $("#progressBar");
 let settingsPane = $("#settingsPane");
 
-let toneUp = $("#toneUp");
-let toneDown = $("#toneDown");
 let workout = new Workout($("#exercises").text());
 
 
