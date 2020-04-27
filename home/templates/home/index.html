@@ -20,10 +20,12 @@
             <button id="settingsButton" type="button" class="close" style="margin-top:-10px;display: none;">
                 <i class="fa fa-cog" onclick="openSettings()" style="font-size:20px;"></i>
             </button>
-            <p id = "onOff">IDK</p>
-            <p id="exercise"></p>
-            <p id="stopwatch-display" class="mx-auto">0.00</p>
             
+            <p id="currentExercise"></p>
+            <p id="nextExercise"></p>
+            <p id="stopwatch-display" class="mx-auto">0.00</p>
+            <p id = "status"></p>
+
             <div class="buttonContainer mt-3">
                 <button id="stopwatch-startStop" class="btn btn-success" onclick="this.blur()"></button>
                 <button id="stopwatch-reset" class="btn btn-primary" onClick="this.blur()"></button>

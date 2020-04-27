@@ -12,7 +12,6 @@ class Workout{
         }));
         // Moving up a level so that fields are easily available
         this.exercises = JSON.parse(myJSONList).map((el)=>{return el.fields});
-        console.log(this.exercises);
     }
 
     generateRandom(){
@@ -25,13 +24,13 @@ class Workout{
     }
 
     // Returns all if no size is passed
-    json(){
+    json(size){
         return size ? this.exercises.slice(0, size): this.exercises;
     }
 }
 
 class Stopwatch{
-    constructor(on, rest, reps){
+    constructor(on, rest, reps, exercises){
         // Binding all functions so that they can be used as button click events
         this.start = this.start.bind(this);
         this.stop = this.stop.bind(this);
@@ -44,7 +43,10 @@ class Stopwatch{
         this.startStopButton = $("#stopwatch-startStop");
         this.resetButton = $("#stopwatch-reset");
         this.display = $("#stopwatch-display");
+        this.currentExercise = $("#currentExercise");
+        this.nextExercise = $("#nextExercise");
 
+        this.exercises = exercises;
         this.time = -5;
         this.active = false;
         this.timer;
@@ -55,10 +57,21 @@ class Stopwatch{
         this.initializeButtons();
         this.initializeProgressBar();
         this.render();
+        console.log(this.exercises);
     }
 
     get total(){
         return this.on + this.rest;
+    }
+
+    get currentInterval(){
+        return Math.ceil(this.time / this.total);
+    }
+
+    get status(){
+        if(this.time < 0) return "Countdown";
+        else if(this.time % this.total < this.on) return "ON";
+        else return "OFF";
     }
 
     // Sets text and click event for buttons
@@ -73,19 +86,37 @@ class Stopwatch{
     // Sets display... add any other necessary methods
     render(){
         this.display.text(this.formatCountdown());
+        $("#status").text(this.status);
+
+        // Setting exercise labels
+        this.currentExercise.text("");
+        this.nextExercise.text("");
+        if(this.currentInterval == 0){
+            this.currentExercise.text("Starting with: " + this.exercises[this.currentInterval].name);
+        }else if(this.currentInterval != this.reps){
+            if(this.status == "ON") this.currentExercise.text(this.exercises[this.currentInterval-1].name);
+            this.nextExercise.text(" Next: " + this.exercises[this.currentInterval].name);
+        }else{
+            this.currentExercise.text(this.exercises[this.currentInterval-1].name);
+        }
+        
+        // Checkinf if the workout is done
+        if(this.time >= ((this.total)*this.reps) - this.rest){
+            this.reset();
+            this.display.text("DONE");
+            this.currentExercise.text("");
+            this.nextExercise.text("");
+        }
+        else{
+            this.updateProgressBar();
+        }
     }
 
     // Increments time
     tick(){
         this.time += 0.01;
-        if(this.time >= (this.total)*this.reps){
-            this.reset();
-            this.display.text("DONE");
-        }
-        else{
-            this.updateProgressBar();
-            this.render();
-        }
+        
+        this.render();
     }
 
     // Default formatting method. Displays as (1.33, 10.33, 1:03.33)
@@ -176,7 +207,6 @@ class Stopwatch{
     updateProgressBar(){
         let currentInterval = Math.ceil(this.time/this.total) - 1;
         let children = $("#progressBar").children();
-        console.log(currentInterval);
         for(let i = 0; i < this.reps; i++){
             // Green
             if(i < currentInterval) $(children[i]).css("background-color", "#99e398");
@@ -203,7 +233,7 @@ let on = 55;
 let rest = 5;
 let reps = 8;
 
-let stopwatch = new Stopwatch(on, rest, reps);
+let stopwatch;
 
 let progressBar = $("#progressBar");
 let settingsPane = $("#settingsPane");
@@ -254,7 +284,7 @@ function updateSettings(){
 
 function initialize(){
     workout.generateRandom();
-    $("#exercise").text(workout.names());
+    stopwatch = new Stopwatch(on, rest, reps, workout.json());
 }
 
 
