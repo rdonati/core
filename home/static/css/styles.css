@@ -45,6 +45,7 @@ button:focus{
     padding: 20px;
     width: 23%;
     transition: width 200ms ease-in;
+    overflow-y: auto;
 }
 
 .settingsContent{

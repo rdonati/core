@@ -57,7 +57,6 @@ class Stopwatch{
         this.initializeButtons();
         this.initializeProgressBar();
         this.render();
-        console.log(this.exercises);
     }
 
     get total(){
@@ -282,9 +281,34 @@ function updateSettings(){
     stopwatch.setSettings(on, rest, reps);
 }
 
+function renderExercises(){
+    let et = $("#exerciseTable");
+    for(let i = 0; i < stopwatch.reps; i++){
+        et.append("<tr><td>" + workout.names()[i] + "</td></tr>");
+    }
+}
+
 function initialize(){
+    $("#exerciseContainer").hide();
     workout.generateRandom();
     stopwatch = new Stopwatch(on, rest, reps, workout.json());
+    renderExercises();
+}
+
+function onWorkoutClick(){
+    $("#workoutTab").addClass("btn-dark");
+    $("#timingTab").removeClass("btn-dark");
+    $("#timingTab").addClass("btn-secondary");
+    $("#exerciseContainer").show();
+    $("#timingContainer").hide();
+}
+
+function onTimingClick(){
+    $("#timingTab").addClass("btn-dark");
+    $("#workoutTab").removeClass("btn-dark");
+    $("#workoutTab").addClass("btn-secondary");
+    $("#timingContainer").show();
+    $("#exerciseContainer").hide();
 }
 
 
